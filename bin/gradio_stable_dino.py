@@ -1,11 +1,14 @@
+import logging
+import argparse
+from get_models import download_config, download_model
+
 import cv2 as cv
 import torch
 import gradio as gr
 import numpy as np
 from PIL import Image, ImageEnhance
-from diffusers import StableDiffusion3Pipeline
+from diffusers import StableDiffusion3Pipeline, StableDiffusionPipeline
 from groundingdino.util.inference import load_model, load_image, predict, annotate
-import logging
 
 
 device = 'cpu'
@@ -14,25 +17,10 @@ if torch.cuda.is_available():
 elif torch.backends.mps.is_available():
     device = 'mps'
 
-
 config_path = "./models/GroundingDINO_SwinT_OGC.py"
 model_path = "./models/groundingdino_swint_ogc.pth"
 
-# Load Stable Diffusion model
-try:
-    pipe = StableDiffusion3Pipeline.from_pretrained("stabilityai/stable-diffusion-3-medium-diffusers", device_map="auto", torch_dtype=torch.float16 if device == "cuda" else None).to(device)
-except Exception as e:
-    logging.error(f"Error loading Stable Diffusion model: {e}")
-    logging.debug("Please check the model path and try again.")
-    pipe = None
-
-# Load GroundingDINO model
-try:
-    model = load_model(config_path, model_path)
-except Exception as e:
-    logging.error(f"Error loading GroundingDINO model: {e}")
-    logging.debug("Please check the model path and try again.")
-    model = None
+version = None
 
 def predict_image(img, text, box_threshold, text_threshold):
     if img is None:
@@ -54,12 +42,16 @@ def predict_image(img, text, box_threshold, text_threshold):
 
 
 def generate_image(text_prompt):
+    global version
     try:
-        image = pipe(text_prompt,
-                    negative_prompt="",
-                    num_inference_steps=28,
-                    guidance_scale=7.0,
-                    ).images[0]
+        if version:
+            image = pipe(text_prompt).images[0]
+        else:
+            image = pipe(text_prompt,
+                        negative_prompt="",
+                        num_inference_steps=28,
+                        guidance_scale=7.0,
+                        ).images[0]
     except Exception as e:
         logging.error(f"Error generating image: {e}")
         logging.debug("Please check the text prompt and try again.")
@@ -73,7 +65,13 @@ def generate_image(text_prompt):
     return enhanced_image
 
 
-def main():
+def main(args):
+    global version
+    if args.version1:
+        version = True
+    else:
+        version = False
+
     # Gradio Interface
     with gr.Blocks() as demo:
         gr.Markdown("## GroundingDINO and Stable Diffusion Integration")
@@ -81,6 +79,7 @@ def main():
         with gr.Tab("Generate Image"):
             prompt = gr.Textbox(label="Text Prompt")
             gen_btn = gr.Button("Generate Image")
+            save_btn = gr.Button("Save Image")
             gen_img = gr.Image()
 
             gen_btn.click(fn=generate_image, inputs=prompt, outputs=gen_img)
@@ -96,7 +95,37 @@ def main():
             pred_btn.click(fn=predict_image, inputs=[img_input, caption, box_thresh, text_thresh], outputs=pred_img)
 
     demo.launch(inbrowser=True)
+    
+
+def get_args():
+    parser = argparse.ArgumentParser(description="GroundingDINO and Stable Diffusion Integration")
+    parser.add_argument("-v1", "--version1", action="store_true", help="Gets the version of the StableDiffusion model")
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    main()
+    args = get_args()
+    try:
+        if args.version1:
+            pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5").to(device)
+            logging.info(f"Stable Diffusion model version: {pipe}")
+        else:
+            pipe = StableDiffusion3Pipeline.from_pretrained("stabilityai/stable-diffusion-3-medium-diffusers", device_map="auto", torch_dtype=torch.float16 if device == "cuda" else None).to(device)
+            logging.info(f"Stable Diffusion model version: {pipe}")
+
+    except Exception as e:
+        logging.error(f"Error loading Stable Diffusion model: {e}")
+        logging.debug("Please check the model.")
+        pipe = None
+
+    # Load GroundingDINO model
+    try:
+        model = load_model(config_path, model_path)
+    except Exception as e:
+        logging.error(f"Error loading GroundingDINO model: {e}")
+        logging.debug("Checking the model and config path...")
+        download_config()
+        download_model()
+        model = None
+
+    main(args)

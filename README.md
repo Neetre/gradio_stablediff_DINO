@@ -34,12 +34,6 @@ Run the following command to login to the Hugging Face CLI:
 $> huggingface-cli login
 ```
 
-Then, run the following command to install the required models:
-
-```bash
-$> python get_models.py
-```
-
 This will install the StableDiff and DINO models in the `models` directory.
 
 ## Running the Program
@@ -48,7 +42,9 @@ This will install the StableDiff and DINO models in the `models` directory.
 
 1. Navigate to the `bin` directory: `cd bin`
 
-2. Execute `python gradio_stable_dino.py` (use `python3` on Linux/macOS) in your terminal
+2. Execute `python gradio_stable_dino.py [--help]` (use `python3` on Linux/macOS) in your terminal
+
+    The `--help` flag displays available command-line arguments.
 
 3. The Gradio interface will open in your browser automatically. It will use the localhost IP address and port 7860 by default.
 
