@@ -99,7 +99,7 @@ def main(args):
 
 def get_args():
     parser = argparse.ArgumentParser(description="GroundingDINO and Stable Diffusion Integration")
-    parser.add_argument("-v1", "--version1", action="store_true", help="Gets the version of the StableDiffusion model")
+    parser.add_argument("-v1", "--version1", action="store_true", help="Gets the v1 version of the StableDiffusion model, else it will get the v3 version.")
     return parser.parse_args()
 
 

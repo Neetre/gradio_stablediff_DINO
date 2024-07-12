@@ -8,10 +8,13 @@ In the other tab, the user can input an image and some text explaining what he w
 
 Models used:
 
-- [StableDiff](https://huggingface.co/stabilityai/stable-diffusion-3-medium)
+- [StableDiff v1](https://huggingface.co/runwayml/stable-diffusion-v1-5)
+- [StableDiff v3](https://huggingface.co/stabilityai/stable-diffusion-3-medium)
 - [DINO](https://huggingface.co/IDEA-Research/grounding-dino-base)
 
-These two model are very large and require a lot of memory to run.
+I've also added the StabbleDiff v1 model, which is a smaller version of the StableDiff v3 model, and uses less memory, but is less accurate.
+
+These three model are very large and require a lot of memory to run.
 If you want to run this interface on your local machine, you will need a lot of memory (RAM) or a powerful GPU (NVDIA).
 
 
