@@ -51,6 +51,16 @@ This will install the StableDiff and DINO models in the `models` directory.
 
 3. The Gradio interface will open in your browser automatically. It will use the localhost IP address and port 7860 by default.
 
+Here is how the interface looks like:
+![Gradio Interface](/data/readme/gradio_interface.png)
+
+Grounding DINO:
+![DINO](/data/readme/dino.png)
+
+StableDiff v1:
+![StableDiff v1](/data/readme/gen.png)
+(ahahahahaha)
+
 ## Author
 
 Neetre
